@@ -1,32 +1,27 @@
-events {
-    worker_connections 1024;
+server{
+  server_name xazuy.orbsia.com; # managed by Certbot
+  listen [::]:443 ssl ipv6only=on; # managed by Certbot
+  listen 443 ssl; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/xazuy.orbsia.com/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/xazuy.orbsia.com/privkey.pem; # managed by Certbot
+  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+  location / {
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Port $server_port;
+    proxy_pass http://appwrite;
+  }
 }
-
-http {
-    server {
-        listen 80;
-        listen 443;
-
-        # config for setting up and handling Appwrite SSL
-
-        ssl_certificate           /etc/nginx/ssl/live/baas.orbsia.com/fullchain.pem;
-        ssl_certificate_key       /etc/nginx/ssl/live/baas.orbsia.com/privkey.pem;
-        ssl on;
-        ssl_session_cache  builtin:1000  shared:SSL:10m;
-        ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
-        ssl_prefer_server_ciphers on;
-
-        server_name baas.orbsia.com;
-
-        location / {
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header Host $host;
-            proxy_set_header X-Forwarded-Host $host;
-            proxy_set_header X-Forwarded-Port $server_port;
-            proxy_pass http://appwrite;
-        }
-    }
+server {
+  if ($host = xazuy.orbsia.com) {
+    return 301 https://$host$request_uri;
+  } # managed by Certbot
+  listen 80 ;
+  listen [::]:80 ;
+  server_name xazuy.orbsia.com;
+  return 404; # managed by Certbot
 }
